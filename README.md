@@ -37,7 +37,7 @@ cp .env.example .env
 npx tsx server/src/index.ts
 
 # 4. 启动前端（新终端）
-npx vite client --host
+npx vite --host
 
 # 5. 打开浏览器
 # http://localhost:5173
