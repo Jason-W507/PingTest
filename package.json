@@ -1,0 +1,10 @@
+{
+  "name": "pingtest",
+  "private": true,
+  "workspaces": [
+    "shared",
+    "server",
+    "client",
+    "probe-agent"
+  ]
+}
