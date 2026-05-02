@@ -121,17 +121,12 @@ function selectNodesForChina(nodes: BoceNode[]): BoceNode[] {
     provinceNodes.set(province, existing);
   }
 
-  // Pick up to 2 nodes per province (different ISPs)
+  // Pick 1 node per province for speed (task completes faster with fewer nodes)
   const selected: BoceNode[] = [];
   for (const [, pNodes] of provinceNodes) {
-    const seenIsps = new Set<string>();
-    for (const node of pNodes) {
-      if (seenIsps.size < 2 && !seenIsps.has(node.isp_name)) {
-        selected.push(node);
-        seenIsps.add(node.isp_name);
-      }
-    }
-    if (selected.length >= 100) break; // Safety cap (unlikely to hit this)
+    // Prefer电信 for consistency, fallback to first available
+    const dianxin = pNodes.find(n => n.isp_name === '电信');
+    selected.push(dianxin || pNodes[0]);
   }
 
   return selected;
@@ -225,13 +220,26 @@ export async function runBoceChinaPing(target: string, packets: number = 4): Pro
     const selected = selectNodesForChina(allNodes);
     if (selected.length === 0) return [];
 
-    console.log(`Boce: using ${selected.length} nodes across ${new Set(selected.map(n => extractProvince(n.node_name))).size} provinces`);
+    const provinceCount = new Set(selected.map(n => extractProvince(n.node_name))).size;
+    console.log(`Boce: ${selected.length} nodes across ${provinceCount} provinces`);
 
-    // Create task
-    const taskId = await createTask(target, selected.map((n) => n.id));
+    // Split into batches of 20 nodes for faster completion
+    const BATCH_SIZE = 20;
+    const batches: BoceNode[][] = [];
+    for (let i = 0; i < selected.length; i += BATCH_SIZE) {
+      batches.push(selected.slice(i, i + BATCH_SIZE));
+    }
 
-    // Poll for results
-    const results = await pollResults(taskId, 60000);
+    // Run all batches in parallel
+    const batchResults = await Promise.all(
+      batches.map(async (batch, i) => {
+        const taskId = await createTask(target, batch.map((n) => n.id));
+        return pollResults(taskId, 120000); // 2min timeout per batch
+      }),
+    );
+
+    // Flatten results
+    const results = batchResults.flat();
 
     // Aggregate by province (take average of ISP nodes within same province)
     const provinceData = new Map<string, {

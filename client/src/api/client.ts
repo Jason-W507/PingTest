@@ -3,7 +3,7 @@ import type { PingTestRequest, PingTestResponse, ProbeListResponse, ServerConfig
 
 const api = axios.create({
   baseURL: '/api',
-  timeout: 60000,
+  timeout: 120000,
 });
 
 export async function runPingTest(req: PingTestRequest): Promise<PingTestResponse> {
