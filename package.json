@@ -1,6 +1,7 @@
 {
   "name": "pingtest",
   "private": true,
+  "type": "module",
   "workspaces": [
     "shared",
     "server",

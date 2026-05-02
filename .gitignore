@@ -6,3 +6,4 @@ dist/
 *.py
 __pycache__/
 *.tsbuildinfo
+.claude/
