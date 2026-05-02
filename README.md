@@ -33,11 +33,11 @@ npm install
 cp .env.example .env
 # 编辑 .env，可选填入 BOCE_API_KEY
 
-# 3. 启动后端
-npx tsx server/src/index.ts
+# 3. 启动后端（终端 1）
+npm run server
 
-# 4. 启动前端（新终端）
-npx vite --host
+# 4. 启动前端（终端 2）
+npm run dev
 
 # 5. 打开浏览器
 # http://localhost:5173

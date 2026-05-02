@@ -1,7 +1,11 @@
 {
   "name": "pingtest",
   "private": true,
-  "type": "module",
+  "scripts": {
+    "dev": "cd client && vite --host",
+    "server": "tsx server/src/index.ts",
+    "build": "cd client && vite build"
+  },
   "workspaces": [
     "shared",
     "server",
